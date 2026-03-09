@@ -660,7 +660,7 @@
     <div id="rsvpForm">
       <div class="rsvp-field">
         <label>Your Name</label>
-        <input type="text" id="rsvpName" placeholder="Full name"/>
+        <input type="text" id="rsvpName" name="name" placeholder="Full name"/>
       </div>
 
       <div class="rsvp-field">
@@ -669,23 +669,23 @@
           <button type="button" class="attend-btn" id="btnYes" onclick="selectAttending('yes')">Joyfully yes</button>
           <button type="button" class="attend-btn" id="btnNo" onclick="selectAttending('no')">Regretfully no</button>
         </div>
-        <input type="hidden" id="attendingVal" value=""/>
+        <input type="hidden" id="attendingVal" name="attending" value=""/>
       </div>
 
       <div id="extraFields" style="display:none;">
         <div class="rsvp-field">
           <label>Email</label>
-          <input type="email" id="rsvpEmail" placeholder="your@email.com"/>
+          <input type="email" id="rsvpEmail" name="email" placeholder="your@email.com"/>
         </div>
 
         <div class="rsvp-field">
           <label>Phone</label>
-          <input type="tel" id="rsvpPhone" placeholder="(000) 000-0000"/>
+          <input type="tel" id="rsvpPhone" name="phone" placeholder="(000) 000-0000"/>
         </div>
 
         <div class="rsvp-field">
           <label>T-Shirt Size</label>
-          <select id="rsvpSize">
+          <select id="rsvpSize" name="tshirt_size">
             <option value="" disabled selected>Select size</option>
             <option>XS</option>
             <option>S</option>
@@ -698,7 +698,7 @@
 
         <div class="rsvp-field">
           <label>Ideal Weekend Budget <span style="font-size:11px;opacity:0.6;">(excluding travel)</span></label>
-          <select id="rsvpBudget">
+          <select id="rsvpBudget" name="budget">
             <option value="" disabled selected>Select range</option>
             <option>$200 – $400</option>
             <option>$400 – $600</option>
@@ -709,12 +709,12 @@
 
         <div class="rsvp-field">
           <label>Dietary Restrictions</label>
-          <input type="text" id="rsvpDiet" placeholder="e.g. vegetarian, gluten-free, none"/>
+          <input type="text" id="rsvpDiet" name="dietary_restrictions" placeholder="e.g. vegetarian, gluten-free, none"/>
         </div>
 
         <div class="rsvp-field">
           <label>Physical Activity Restrictions</label>
-          <textarea id="rsvpActivity" placeholder="Any injuries, mobility limitations, or activities to avoid?"></textarea>
+          <textarea id="rsvpActivity" name="activity_restrictions" placeholder="Any injuries, mobility limitations, or activities to avoid?"></textarea>
         </div>
       </div>
 
@@ -751,7 +751,7 @@
       const budget = document.getElementById('rsvpBudget').value;
       const dietary = document.getElementById('rsvpDiet').value.trim();
       const activity = document.getElementById('rsvpActivity').value.trim();
-      
+
       if (!email || !phone || !size || !budget || !dietary || !activity) {
         alert('Please fill in all fields before submitting.');
         return;
@@ -762,16 +762,15 @@
     submitBtn.textContent = 'Sending…';
     submitBtn.disabled = true;
 
-    const payload = {
-      name,
-      attending,
-      email: document.getElementById('rsvpEmail')?.value || '',
-      phone: document.getElementById('rsvpPhone')?.value || '',
-      tshirt_size: document.getElementById('rsvpSize')?.value || '',
-      budget: document.getElementById('rsvpBudget')?.value || '',
-      dietary: document.getElementById('rsvpDiet')?.value || '',
-      activity_restrictions: document.getElementById('rsvpActivity')?.value || '',
-    };
+    const payload = { name, attending };
+    if (attending === 'yes') {
+      payload.email = document.getElementById('rsvpEmail').value.trim();
+      payload.phone = document.getElementById('rsvpPhone').value.trim();
+      payload.tshirt_size = document.getElementById('rsvpSize').value;
+      payload.budget = document.getElementById('rsvpBudget').value;
+      payload.dietary = document.getElementById('rsvpDiet').value.trim();
+      payload.activity_restrictions = document.getElementById('rsvpActivity').value.trim();
+    }
 
     try {
       const res = await fetch('https://formspree.io/f/mnjgjwwq', {
@@ -783,10 +782,11 @@
         document.getElementById('rsvpForm').style.display = 'none';
         document.getElementById('rsvpSuccess').style.display = 'block';
       } else {
-        throw new Error('Submit failed');
+        const data = await res.json();
+        throw new Error(data?.error || `Server error: ${res.status}`);
       }
-    } catch {
-      alert('Something went wrong. Please try again.');
+    } catch(err) {
+      alert('Something went wrong: ' + err.message);
       submitBtn.textContent = 'Submit ✦';
       submitBtn.disabled = false;
     }
