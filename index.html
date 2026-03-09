@@ -29,8 +29,6 @@
   }
 
   .card {
-    width: 700px;
-    height: 980px;
     position: relative;
     overflow: hidden;
     background: linear-gradient(
@@ -436,7 +434,7 @@
   <div class="gold-pool"></div>
 
   <!-- Full ornamental SVG layer -->
-  <svg class="ornament-svg" viewBox="0 0 700 980" xmlns="http://www.w3.org/2000/svg">
+  <svg id="ornamentSvg" class="ornament-svg" viewBox="0 0 700 980" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%" style="stop-color:#c9a040;stop-opacity:1"/>
@@ -741,21 +739,36 @@
 </div>
 
 <script>
-  function scaleCard() {
+  function resizeCard() {
     const card = document.getElementById('mainCard');
     const padding = 40;
-    const availableHeight = window.innerHeight - padding;
-    const availableWidth = window.innerWidth - padding;
-    const scaleH = availableHeight / 980;
-    const scaleW = availableWidth / 700;
+    const availH = window.innerHeight - padding;
+    const availW = window.innerWidth - padding;
+
+    // Scale card to fit viewport, max 1:1
+    const scaleH = availH / 980;
+    const scaleW = availW / 700;
     const scale = Math.min(scaleH, scaleW, 1);
-    card.style.transform = `scale(${scale})`;
-    card.style.transformOrigin = 'top center';
-    // Adjust wrapper height so no scroll gap
-    card.parentElement.style.height = (980 * scale + padding) + 'px';
+
+    const newW = Math.round(700 * scale);
+    const newH = Math.round(980 * scale);
+
+    card.style.width = newW + 'px';
+    card.style.height = newH + 'px';
+    card.style.transform = '';
+
+    // Update SVG viewBox to match new dimensions so content fills correctly
+    const svg = document.getElementById('ornamentSvg');
+    svg.setAttribute('viewBox', `0 0 700 980`);
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+
+    // Set wrapper height
+    card.parentElement.style.minHeight = (newH + padding) + 'px';
   }
-  scaleCard();
-  window.addEventListener('resize', scaleCard);
+
+  resizeCard();
+  window.addEventListener('resize', resizeCard);
 </script>
     const digits = input.value.replace(/\D/g, '').slice(0, 10);
     let formatted = '';
