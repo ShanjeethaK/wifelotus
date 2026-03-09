@@ -14,10 +14,18 @@
     overflow-y: auto;
     background: #1a1410;
     display: flex;
-    align-items: flex-start;
+    align-items: center;
     justify-content: center;
-    padding: 40px 0;
+    padding: 20px 0;
     box-sizing: border-box;
+  }
+
+  .card-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 20px 0;
   }
 
   .card {
@@ -419,7 +427,8 @@
 </style>
 </head>
 <body>
-<div class="card">
+<div class="card-wrapper">
+<div class="card" id="mainCard">
   <div class="navy-stripe-top"></div>
   <div class="navy-stripe"></div>
   <div class="teal-wash"></div>
@@ -651,6 +660,7 @@
 
   <p class="bottom-tag">Last fling before the ring ✦</p>
 </div>
+</div><!-- end card-wrapper -->
 <!-- RSVP Overlay -->
 <div class="rsvp-overlay" id="rsvpOverlay">
   <div class="rsvp-form-card">
@@ -731,7 +741,22 @@
 </div>
 
 <script>
-  function formatPhone(input) {
+  function scaleCard() {
+    const card = document.getElementById('mainCard');
+    const padding = 40;
+    const availableHeight = window.innerHeight - padding;
+    const availableWidth = window.innerWidth - padding;
+    const scaleH = availableHeight / 980;
+    const scaleW = availableWidth / 700;
+    const scale = Math.min(scaleH, scaleW, 1);
+    card.style.transform = `scale(${scale})`;
+    card.style.transformOrigin = 'top center';
+    // Adjust wrapper height so no scroll gap
+    card.parentElement.style.height = (980 * scale + padding) + 'px';
+  }
+  scaleCard();
+  window.addEventListener('resize', scaleCard);
+</script>
     const digits = input.value.replace(/\D/g, '').slice(0, 10);
     let formatted = '';
     if (digits.length > 0) formatted = '(' + digits.slice(0, 3);
